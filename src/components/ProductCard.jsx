@@ -1,61 +1,79 @@
-// ==========================================================================
-// ProductCard.jsx
-// --------------------------------------------------------------------------
-// CONTRATO DE ESTE COMPONENTE: recibe una única prop llamada `servicio`,
-// con la forma que define src/data/db.js (codigo, nombre, precio, categoria,
-// descripcion, duracion, modalidad). NO recibe `agregarAlCarrito` por
-// prop: lo toma directo del CarritoContext con useCarrito(), igual que
-// hacen Home.jsx y Catalogo.jsx al usar <ProductCard servicio={s} />.
-// ==========================================================================
-
 import { useCarrito } from "../context/CarritoContext";
 import { formatoCLP } from "../utils/validaciones";
 
-const ETIQUETA_CATEGORIA = {
-  consulta: { texto: "Consulta Presencial", clase: "bg-primary" },
-  teleconsulta: { texto: "Teleconsulta", clase: "bg-info text-dark" },
-  plan: { texto: "Plan Especializado", clase: "bg-warning text-dark" },
-  evaluacion: { texto: "Evaluación", clase: "bg-secondary" },
-  taller: { texto: "Taller Grupal", clase: "bg-success" },
+// Diccionario para mostrar nombres limpios de las categorías sin usar colores saturados
+const CATEGORIAS_TEXTO = {
+  consulta: "Consulta Presencial",
+  teleconsulta: "Teleconsulta",
+  plan: "Plan Especializado",
+  evaluacion: "Evaluación",
+  taller: "Taller Grupal",
 };
 
 function ProductCard({ servicio }) {
   const { agregarAlCarrito } = useCarrito();
 
-  // Guarda de seguridad: si algún día esto se renderiza sin servicio
-  // (por ejemplo, por un bug como el que acabamos de arreglar), mostramos
-  // un aviso en vez de que la página entera se rompa en blanco.
-  if (!servicio) {
-    return (
-      <div className="col">
-        <div className="alert alert-warning small mb-0">Servicio no disponible.</div>
-      </div>
-    );
-  }
+  if (!servicio) return null;
 
-  const etiqueta = ETIQUETA_CATEGORIA[servicio.categoria] || { texto: servicio.categoria, clase: "bg-secondary" };
-  const stockCritico =
-    servicio.stock !== null && servicio.stockCritico !== null && servicio.stock <= servicio.stockCritico;
+  const textoCategoria = CATEGORIAS_TEXTO[servicio.categoria] || servicio.categoria;
+  const stockCritico = servicio.stock !== null && servicio.stockCritico !== null && servicio.stock <= servicio.stockCritico;
 
   return (
     <div className="col">
-      <div className="card h-100 shadow-sm border-0 card-servicio">
-        <div className="card-body pb-0 bg-transparent">
-          <span className={`badge ${etiqueta.clase} mb-2`}>{etiqueta.texto}</span>
-          <h4 className="card-title fw-bold h5">{servicio.nombre}</h4>
-          <p className="text-muted small mb-1">
-            Código: {servicio.codigo} · {servicio.duracion} · {servicio.modalidad}
+      <div className="card h-100 shadow-sm border-0 rounded-4 hover-lift overflow-hidden" style={{ border: '1px solid #e2e8e4' }}>
+        
+        <div className="card-body p-4 d-flex flex-column bg-white text-center">
+          
+          {/* Etiqueta de categoría sutil y minimalista */}
+          <div className="mb-3">
+            <span className="badge bg-light text-secondary border px-3 py-2 rounded-pill text-uppercase fw-semibold" style={{ letterSpacing: '0.5px', fontSize: '0.7rem' }}>
+              {textoCategoria}
+            </span>
+          </div>
+
+          <h5 className="card-title fw-bolder mb-3" style={{ color: '#12351e', lineHeight: '1.4' }}>
+            {servicio.nombre}
+          </h5>
+          
+          {/* Detalles técnicos (código y duración) limpios */}
+          <div className="text-muted small mb-3 d-flex justify-content-center flex-wrap gap-2">
+            <span><i className="bi bi-upc-scan me-1"></i>{servicio.codigo}</span>
+            <span><i className="bi bi-clock me-1"></i>{servicio.duracion}</span>
+          </div>
+          
+          {/* Alerta de stock crítico */}
+          {stockCritico && (
+            <div className="mb-3">
+               <span className="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill border border-danger border-opacity-25">
+                 <i className="bi bi-exclamation-circle me-1"></i>Cupos limitados
+               </span>
+            </div>
+          )}
+          
+          <p className="card-text text-secondary small flex-grow-1 px-2">
+            {servicio.descripcion}
           </p>
-          {stockCritico && <p className="small text-danger fw-semibold mb-0">⚠️ Cupos limitados</p>}
-        </div>
-        <div className="card-body pt-2">
-          <p className="card-text">{servicio.descripcion}</p>
-          <span className="h5 text-success fw-bold d-block">{formatoCLP(servicio.precio)}</span>
-        </div>
-        <div className="card-footer bg-white border-0 pt-0">
-          <button type="button" className="btn btn-outline-success w-100 fw-bold" onClick={() => agregarAlCarrito(servicio)}>
-            🛒 Añadir al Carrito
-          </button>
+          
+          {/* Sección de Precio y Botón - Limpia y directa */}
+          <div className="mt-3 pt-4 border-top">
+            <span className="text-danger fw-bold small d-block mb-1">Desde:</span>
+            
+            {/* Precio destacado solo con tipografía y color institucional */}
+            <div className="display-6 fw-bolder mb-4" style={{ color: '#1e5631' }}>
+              {formatoCLP(servicio.precio)}
+            </div>
+            
+            <button 
+              type="button" 
+              className="btn btn-outline-dark w-100 fw-bold rounded-pill d-flex align-items-center justify-content-center gap-2 btn-transition" 
+              data-bs-toggle="offcanvas" 
+              data-bs-target="#offcanvasCarrito"
+              onClick={() => agregarAlCarrito(servicio)}
+            >
+              CONTRATA <i className="bi bi-arrow-right"></i>
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
