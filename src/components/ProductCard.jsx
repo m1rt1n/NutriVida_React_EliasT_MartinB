@@ -1,58 +1,65 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+// ==========================================================================
+// ProductCard.jsx
+// --------------------------------------------------------------------------
+// CONTRATO DE ESTE COMPONENTE: recibe una única prop llamada `servicio`,
+// con la forma que define src/data/db.js (codigo, nombre, precio, categoria,
+// descripcion, duracion, modalidad). NO recibe `agregarAlCarrito` por
+// prop: lo toma directo del CarritoContext con useCarrito(), igual que
+// hacen Home.jsx y Catalogo.jsx al usar <ProductCard servicio={s} />.
+// ==========================================================================
 
-const ProductCard = ({ producto, agregarAlCarrito }) => {
-  // Asegurar que las propiedades existan para evitar errores de renderizado
-  const { id, nombre, precio, categoria, imagen, descripcion } = producto;
+import { useCarrito } from "../context/CarritoContext";
+import { formatoCLP } from "../utils/validaciones";
+
+const ETIQUETA_CATEGORIA = {
+  consulta: { texto: "Consulta Presencial", clase: "bg-primary" },
+  teleconsulta: { texto: "Teleconsulta", clase: "bg-info text-dark" },
+  plan: { texto: "Plan Especializado", clase: "bg-warning text-dark" },
+  evaluacion: { texto: "Evaluación", clase: "bg-secondary" },
+  taller: { texto: "Taller Grupal", clase: "bg-success" },
+};
+
+function ProductCard({ servicio }) {
+  const { agregarAlCarrito } = useCarrito();
+
+  // Guarda de seguridad: si algún día esto se renderiza sin servicio
+  // (por ejemplo, por un bug como el que acabamos de arreglar), mostramos
+  // un aviso en vez de que la página entera se rompa en blanco.
+  if (!servicio) {
+    return (
+      <div className="col">
+        <div className="alert alert-warning small mb-0">Servicio no disponible.</div>
+      </div>
+    );
+  }
+
+  const etiqueta = ETIQUETA_CATEGORIA[servicio.categoria] || { texto: servicio.categoria, clase: "bg-secondary" };
+  const stockCritico =
+    servicio.stock !== null && servicio.stockCritico !== null && servicio.stock <= servicio.stockCritico;
 
   return (
-    <div className="col-md-4 mb-4">
-      <div className="card h-100 shadow-sm border-0 transition-hover">
-        {/* Imagen del producto con etiqueta de categoría */}
-        <div className="position-relative">
-          <img 
-            src={imagen || 'https://via.placeholder.com/300x200?text=NutriVida'} 
-            className="card-img-top" 
-            alt={nombre}
-            style={{ height: '200px', objectFit: 'cover' }}
-          />
-          <span className="position-absolute top-0 end-0 m-2 badge bg-success text-white shadow-sm">
-            {categoria || 'Saludable'}
-          </span>
-        </div>
-
-        {/* Cuerpo de la tarjeta */}
-        <div className="card-body d-flex flex-column">
-          <h5 className="card-title fw-bold text-dark">{nombre}</h5>
-          <p className="card-text text-muted small flex-grow-1">
-            {descripcion ? (descripcion.length > 80 ? descripcion.substring(0, 80) + '...' : descripcion) : 'Producto natural y saludable seleccionado especialmente para tu bienestar.'}
+    <div className="col">
+      <div className="card h-100 shadow-sm border-0 card-servicio">
+        <div className="card-body pb-0 bg-transparent">
+          <span className={`badge ${etiqueta.clase} mb-2`}>{etiqueta.texto}</span>
+          <h4 className="card-title fw-bold h5">{servicio.nombre}</h4>
+          <p className="text-muted small mb-1">
+            Código: {servicio.codigo} · {servicio.duracion} · {servicio.modalidad}
           </p>
-          <div className="mb-3">
-            <span className="fs-5 fw-bold text-success">
-              ${precio ? precio.toLocaleString('es-CL') : '0'}
-            </span>
-          </div>
-
-          {/* Botones de acción */}
-          <div className="d-flex gap-2">
-            <button 
-              className="btn btn-success flex-grow-1 fw-bold shadow-sm"
-              onClick={() => agregarAlCarrito(producto)}
-            >
-              🛒 Añadir
-            </button>
-            <Link 
-              to={`/producto/${id}`} 
-              className="btn btn-outline-secondary"
-              title="Ver detalle"
-            >
-              🔍
-            </Link>
-          </div>
+          {stockCritico && <p className="small text-danger fw-semibold mb-0">⚠️ Cupos limitados</p>}
+        </div>
+        <div className="card-body pt-2">
+          <p className="card-text">{servicio.descripcion}</p>
+          <span className="h5 text-success fw-bold d-block">{formatoCLP(servicio.precio)}</span>
+        </div>
+        <div className="card-footer bg-white border-0 pt-0">
+          <button type="button" className="btn btn-outline-success w-100 fw-bold" onClick={() => agregarAlCarrito(servicio)}>
+            🛒 Añadir al Carrito
+          </button>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default ProductCard;

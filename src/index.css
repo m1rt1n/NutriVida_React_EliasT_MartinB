@@ -1,0 +1,4 @@
+/* Reset mínimo; el grueso del estilo vive en Estilos.css (ver src/Estilos.css) */
+* {
+  box-sizing: border-box;
+}
