@@ -1,11 +1,6 @@
 // ==========================================================================
 // Navbar.jsx
-// --------------------------------------------------------------------------
-// CONTRATO: tampoco recibe props. Lee el carrito y la sesión directo de
-// los Context (useCarrito / useAuth) para que el contador de reservas y
-// los botones de Admin/Salir reaccionen solos cuando cambian.
 // ==========================================================================
-
 import { Link } from "react-router-dom";
 import { useCarrito } from "../context/CarritoContext";
 import { useAuth } from "../context/AuthContext";
@@ -13,14 +8,15 @@ import { useAuth } from "../context/AuthContext";
 function Navbar() {
   const { carrito } = useCarrito();
   const { usuario, cerrarSesion } = useAuth();
+  
+  // Condición de seguridad: Solo es true si el usuario actual es administrador
   const esAdmin = usuario?.rol === "administrador";
 
   return (
-    <header className="navbar navbar-expand-lg sticky-top py-2 header-nutrivida">
+    <header className="navbar navbar-expand-lg sticky-top py-2 header-nutrivida shadow-sm">
       <div className="container">
 
-        {/* Marca / Logo — el archivo vive en public/LogoNutriVida.jpg,
-            por eso la ruta es "/LogoNutriVida.jpg" y NO "/img/..." */}
+        {/* Marca / Logo */}
         <Link to="/" className="navbar-brand d-flex align-items-center text-decoration-none m-0 py-1">
           <div className="logo-wrapper me-2">
             <img src="/LogoNutriVida.jpg" alt="Logotipo Clínica NutriVida" className="logo-navbar" />
@@ -46,12 +42,15 @@ function Navbar() {
           </nav>
 
           <div className="d-flex flex-nowrap align-items-center gap-2 mt-2 mt-lg-0">
+            
+            {/* BOTÓN MÁGICO: Solo visible si esAdmin es true */}
             {esAdmin && (
-              <Link to="/admin" className="btn btn-outline-warning btn-sm fw-semibold text-nowrap">
-                <i className="bi bi-sliders me-1"></i>Admin
+              <Link to="/admin" className="btn btn-light btn-sm fw-bold text-success text-nowrap shadow-sm">
+                <i className="bi bi-gear-fill me-1"></i>Panel Admin
               </Link>
             )}
 
+            {/* BOTONES DE SESIÓN */}
             {usuario ? (
               <button onClick={cerrarSesion} className="btn btn-danger btn-sm fw-semibold text-nowrap">
                 Salir ({usuario.nombre})
@@ -67,6 +66,7 @@ function Navbar() {
               </>
             )}
 
+            {/* CARRITO / RESERVAS */}
             <button className="btn btn-warning btn-sm fw-bold text-dark text-nowrap shadow-sm px-3 rounded-pill" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCarrito">
               <i className="bi bi-calendar2-check me-1"></i>Reservas ({carrito.length})
             </button>
