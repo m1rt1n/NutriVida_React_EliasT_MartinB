@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
 import Catalogo from '../views/Catalogo';
 import { CarritoContext } from '../context/CarritoContext';
 
@@ -13,11 +14,12 @@ describe('Pruebas del Componente Catalogo', () => {
       </CarritoContext.Provider>
     );
     // Verifica que el título principal de la vista exista
-    expect(screen.getByText(/Aranceles|Catálogo de Planes/i)).toBeTruthy();
+    expect(screen.getByText(/Nuestros Servicios y Planes/i)).toBeTruthy();
   });
 
   it('debe invocar la función de agregar al carrito al hacer clic en un servicio', () => {
-    const mockAgregar = jasmine.createSpy('agregarAlCarrito'); // Cambia a jest.fn() si usas Jest en lugar de Jasmine
+    // Cambio clave: Usamos vi.fn() de Vitest en lugar del antiguo jasmine.createSpy
+    const mockAgregar = vi.fn(); 
     
     render(
       <CarritoContext.Provider value={{ carrito: [], agregarAlCarrito: mockAgregar }}>
@@ -28,7 +30,7 @@ describe('Pruebas del Componente Catalogo', () => {
     );
 
     // Busca el primer botón de agregar y simula un clic
-    const botonesAgregar = screen.getAllByText(/Agregar|Reservar/i);
+    const botonesAgregar = screen.getAllByText(/CONTRATA/i);
     if (botonesAgregar.length > 0) {
       fireEvent.click(botonesAgregar[0]);
       expect(mockAgregar).toHaveBeenCalled();

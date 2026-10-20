@@ -12,7 +12,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 const CLAVE_CARRITO = "carritoNutriVida";
-const CarritoContext = createContext(null);
+export const CarritoContext = createContext(null);
 
 export function CarritoProvider({ children }) {
   // Mismo patrón que antes: leer de localStorage al iniciar, o arreglo vacío

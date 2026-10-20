@@ -5,7 +5,7 @@ import { createContext, useContext, useState } from "react";
 
 const CLAVE_USUARIOS = "nutrivida_usuarios";
 const CLAVE_SESION = "nutrivida_sesion";
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 const adminElias = {
   rut: "20333444-5", nombre: "Elías", apellidos: "Terán", correo: "eliasteran.bustos@gmail.com", 
