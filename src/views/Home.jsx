@@ -21,6 +21,7 @@ function Home() {
         </div>
         
         <div className="carousel-inner">
+          {/* Slide 1: Asesoría Nutricional Personalizada */}
           <div className="carousel-item active hero-banner text-center text-white" style={{ padding: '6rem 0 8rem 0' }}>
             <div className="container">
               <h1 className="display-5 fw-bold mb-3">Asesoría Nutricional Personalizada</h1>
@@ -30,18 +31,42 @@ function Home() {
             </div>
           </div>
           
-          <div className="carousel-item text-center text-white" style={{ backgroundColor: '#20B2AA', padding: '6rem 0 8rem 0' }}>
+          {/* Slide 2: Nutrición Deportiva Avanzada (/pexels-ogutomacedo-13013778.jpg) */}
+          <div
+            className="carousel-item text-center text-white"
+            style={{
+              backgroundImage: "linear-gradient(90deg, rgba(18, 53, 30, 0.65) 0%, rgba(30, 86, 49, 0.50) 50%, rgba(0, 0, 0, 0.55) 100%), url('/pexels-ogutomacedo-13013778.jpg')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 55%',
+              padding: '6rem 0 8rem 0',
+            }}
+          >
             <div className="container">
-              <h1 className="display-5 fw-bold mb-3">Nutrición Deportiva Avanzada</h1>
+              <h1 className="display-5 fw-bold mb-3" style={{ textShadow: '0 2px 6px rgba(0, 0, 0, 0.65)' }}>
+                Nutrición Deportiva Avanzada
+              </h1>
               <p className="fs-5 mx-auto hero-texto" style={{ maxWidth: '700px' }}>
                 Mejora tu rendimiento físico, aumenta masa muscular y optimiza tu recuperación con nuestros especialistas.
               </p>
             </div>
           </div>
           
-          <div className="carousel-item text-center text-white" style={{ backgroundColor: '#4682B4', padding: '6rem 0 8rem 0' }}>
+          {/* Slide 3: Evaluación de Composición Corporal (/pexels-karola-g-5714308.jpg)
+              Se usa backgroundPosition: 'center 70%' para encuadrar directamente el bíceps,
+              la cinta métrica y las manos, ya que la foto original es vertical (682x1024). */}
+          <div
+            className="carousel-item text-center text-white"
+            style={{
+              backgroundImage: "linear-gradient(90deg, rgba(18, 53, 30, 0.52) 0%, rgba(30, 86, 49, 0.42) 50%, rgba(0, 0, 0, 0.45) 100%), url('/pexels-karola-g-5714308.jpg')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 70%',
+              padding: '6rem 0 8rem 0',
+            }}
+          >
             <div className="container">
-              <h1 className="display-5 fw-bold mb-3">Evaluación de Composición Corporal</h1>
+              <h1 className="display-5 fw-bold mb-3" style={{ textShadow: '0 2px 6px rgba(0, 0, 0, 0.65)' }}>
+                Evaluación de Composición Corporal
+              </h1>
               <p className="fs-5 mx-auto hero-texto" style={{ maxWidth: '700px' }}>
                 Conoce tu porcentaje exacto de masa grasa y muscular a través de nuestros exámenes especializados.
               </p>
