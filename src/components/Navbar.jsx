@@ -12,7 +12,6 @@ function Navbar() {
     <header className="navbar navbar-expand-lg sticky-top py-2 header-nutrivida shadow-sm">
       <div className="container">
 
-        {/* Marca / Logo - Arreglado con borde circular perfecto */}
         <Link to="/" className="navbar-brand d-flex align-items-center text-decoration-none m-0 py-1">
           <div className="bg-white shadow-sm d-flex align-items-center justify-content-center me-2" style={{ width: '48px', height: '48px', borderRadius: '50%', overflow: 'hidden' }}>
             <img src="/LogoNutriVida.jpg" alt="Logotipo Clínica NutriVida" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -32,7 +31,6 @@ function Navbar() {
             <Link to="/" className="nav-link link-menu">Inicio</Link>
             <Link to="/especialidad" className="nav-link link-menu">Especialidad</Link>
             <Link to="/catalogo" className="nav-link link-menu">Aranceles y Planes</Link>
-            {/* Cambio de nombre: Equipo Nutricional */}
             <Link to="/equipo" className="nav-link link-menu">Equipo Nutricional</Link>
             <Link to="/dudas" className="nav-link link-menu">Dudas</Link>
             <Link to="/contacto" className="nav-link link-menu">Contacto</Link>

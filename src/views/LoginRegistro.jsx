@@ -2,13 +2,17 @@
 // LoginRegistro.jsx
 // ==========================================================================
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { validarRutChileno, comunasPorRegion } from "../utils/validaciones";
 
 // --- Validaciones en tiempo real ---
-const validarEmailUniversal = (email) => {
+const dominiosPermitidos = ["@duocuc.cl", "@profesor.duocuc.cl", "@gmail.com"];
+
+const validarEmailPermitido = (email) => {
   const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regexEmail.test(email);
+  if (!regexEmail.test(email)) return false;
+  return dominiosPermitidos.some(dominio => email.toLowerCase().endsWith(dominio));
 };
 
 const validarPasswordFuerte = (password) => {
@@ -29,13 +33,12 @@ const getInputClass = (value, validatorFn) => {
 // ----------------------------- MODAL LOGIN --------------------------------
 export function ModalLogin() {
   const { iniciarSesion } = useAuth();
+  const navigate = useNavigate();
   const [correo, setCorreo] = useState("");
   const [clave, setClave] = useState("");
   const [rolLogin, setRolLogin] = useState("");
   const [vistaTrabajador, setVistaTrabajador] = useState(false);
   const [errorSesion, setErrorSesion] = useState(null);
-  
-  // Nuevo estado para mostrar/ocultar contraseña
   const [mostrarClave, setMostrarClave] = useState(false);
 
   function limpiarFormulario() {
@@ -56,14 +59,19 @@ export function ModalLogin() {
     setErrorSesion(null);
     const rolFinal = vistaTrabajador ? rolLogin : "cliente";
 
-    if (validarEmailUniversal(correo) && validarPasswordFuerte(clave) && rolFinal !== "") {
+    if (validarEmailPermitido(correo) && validarPasswordFuerte(clave) && rolFinal !== "") {
       const resultado = iniciarSesion(correo.trim(), clave, rolFinal);
 
       if (resultado.exito) {
         alert(`Inicio de sesión exitoso. ¡Bienvenido a NutriVida!`);
         limpiarFormulario();
         setVistaTrabajador(false);
+        
         document.getElementById("btn-cerrar-modal-login")?.click();
+
+        if (resultado.rol === "administrador") {
+          setTimeout(() => navigate('/admin'), 300);
+        }
       } else {
         setErrorSesion(resultado.mensaje);
       }
@@ -109,11 +117,16 @@ export function ModalLogin() {
                 <label className="form-label fw-semibold">Correo Electrónico</label>
                 <input
                   type="email"
-                  className={getInputClass(correo, validarEmailUniversal)}
-                  placeholder="ejemplo@correo.com"
+                  className={getInputClass(correo, validarEmailPermitido)}
+                  placeholder="ejemplo@duocuc.cl"
                   value={correo}
                   onChange={(e) => setCorreo(e.target.value)}
                 />
+                {correo.length > 0 && !validarEmailPermitido(correo) && (
+                  <div className="invalid-feedback d-block">
+                    Solo permitimos dominios @duocuc.cl, @profesor.duocuc.cl o @gmail.com
+                  </div>
+                )}
               </div>
               
               <div className="mb-4">
@@ -134,7 +147,6 @@ export function ModalLogin() {
                   >
                     <i className={`bi ${mostrarClave ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
                   </button>
-                  {/* El invalid-feedback debe estar aquí dentro del input-group para que Bootstrap lo renderice bien */}
                   {clave.length > 0 && !validarPasswordFuerte(clave) && (
                     <div className="invalid-feedback">Debe tener mínimo 8 caracteres, una mayúscula y un número.</div>
                   )}
@@ -144,7 +156,7 @@ export function ModalLogin() {
               <button 
                 type="submit" 
                 className={`btn w-100 fw-bold py-2 ${vistaTrabajador ? 'btn-dark' : 'btn-success'}`}
-                disabled={!validarEmailUniversal(correo) || !validarPasswordFuerte(clave) || (vistaTrabajador && rolLogin === "")}
+                disabled={!validarEmailPermitido(correo) || !validarPasswordFuerte(clave) || (vistaTrabajador && rolLogin === "")}
               >
                 Ingresar {vistaTrabajador && "al Sistema"}
               </button>
@@ -179,8 +191,6 @@ const valorInicial = {
 export function ModalRegistro() {
   const { registrar } = useAuth();
   const [form, setForm] = useState(valorInicial);
-  
-  // Nuevo estado para mostrar/ocultar contraseña en el registro
   const [mostrarClave, setMostrarClave] = useState(false);
 
   function actualizarCampo(campo, valor) {
@@ -195,7 +205,7 @@ export function ModalRegistro() {
       validarRutChileno(form.rut) &&
       validarSoloLetras(form.nombre) &&
       validarSoloLetras(form.apellidos) &&
-      validarEmailUniversal(form.correo) &&
+      validarEmailPermitido(form.correo) &&
       validarPasswordFuerte(form.clave) &&
       form.region !== "" &&
       form.comuna !== "" &&
@@ -230,13 +240,18 @@ export function ModalRegistro() {
               <div className="mb-3">
                 <label className="form-label fw-semibold">RUT / RUN (sin puntos ni guion)</label>
                 <input 
+                  maxLength="9" /* <-- Ajustado a 9 caracteres máximo */
                   className={getInputClass(form.rut, validarRutChileno)} 
                   placeholder="ej: 19011022K" 
                   value={form.rut} 
-                  onChange={(e) => actualizarCampo("rut", e.target.value)} 
+                  onChange={(e) => {
+                    // Filtra todo lo que no sea número o la letra k/K, impidiendo escribir guiones
+                    const valorLimpio = e.target.value.replace(/[^0-9kK]/g, '');
+                    actualizarCampo("rut", valorLimpio.toUpperCase());
+                  }} 
                 />
                 {form.rut.length > 0 && !validarRutChileno(form.rut) && (
-                  <div className="invalid-feedback d-block">RUT inválido. Verifica el formato.</div>
+                  <div className="invalid-feedback d-block">RUT inválido. Verifica el formato sin puntos ni guion.</div>
                 )}
               </div>
 
@@ -265,11 +280,16 @@ export function ModalRegistro() {
                   <label className="form-label fw-semibold">Correo Electrónico</label>
                   <input 
                     type="email" 
-                    className={getInputClass(form.correo, validarEmailUniversal)} 
-                    placeholder="ejemplo@correo.com" 
+                    className={getInputClass(form.correo, validarEmailPermitido)} 
+                    placeholder="ejemplo@duocuc.cl" 
                     value={form.correo} 
                     onChange={(e) => actualizarCampo("correo", e.target.value)} 
                   />
+                  {form.correo.length > 0 && !validarEmailPermitido(form.correo) && (
+                    <div className="invalid-feedback d-block">
+                      Solo permitimos dominios @duocuc.cl, @profesor.duocuc.cl o @gmail.com
+                    </div>
+                  )}
                 </div>
                 
                 <div className="col-md-6 mb-3">

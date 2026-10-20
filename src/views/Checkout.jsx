@@ -2,7 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCarrito } from "../context/CarritoContext";
 import { useAuth } from "../context/AuthContext";
-import { validarDominioCorreo, comunasPorRegion, formatoCLP } from "../utils/validaciones";
+// Se quitó validarDominioCorreo de las importaciones
+import { comunasPorRegion, formatoCLP } from "../utils/validaciones";
+
+// Lista de dominios permitidos
+const dominiosPermitidos = ["@duocuc.cl", "@profesor.duocuc.cl", "@gmail.com"];
+
+const validarEmailPermitido = (email) => {
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!regexEmail.test(email)) return false;
+  return dominiosPermitidos.some(dominio => email.toLowerCase().endsWith(dominio));
+};
 
 function Checkout() {
   const { carrito, total, vaciarCarrito } = useCarrito();
@@ -29,8 +39,12 @@ function Checkout() {
 
     if (!form.nombre.trim()) nuevosErrores.nombre = "El nombre es obligatorio.";
     if (!form.apellidos.trim()) nuevosErrores.apellidos = "Los apellidos son obligatorios.";
-    if (!form.correo.trim()) nuevosErrores.correo = "El correo es obligatorio.";
-    else if (!validarDominioCorreo(form.correo.trim())) nuevosErrores.correo = "El dominio debe ser @duocuc.cl";
+    if (!form.correo.trim()) {
+      nuevosErrores.correo = "El correo es obligatorio.";
+    } else if (!validarEmailPermitido(form.correo.trim())) {
+      nuevosErrores.correo = "Solo se permiten dominios @duocuc.cl, @profesor.duocuc.cl o @gmail.com";
+    }
+    
     if (!form.region) nuevosErrores.region = "Selecciona una región.";
     if (!form.comuna) nuevosErrores.comuna = "Selecciona una comuna.";
     if (!form.direccion.trim()) nuevosErrores.direccion = "La dirección es obligatoria.";

@@ -7,10 +7,9 @@ const CLAVE_USUARIOS = "nutrivida_usuarios";
 const CLAVE_SESION = "nutrivida_sesion";
 const AuthContext = createContext(null);
 
-// --- TU CUENTA DE ADMINISTRADOR FIJA ---
 const adminElias = {
   rut: "20333444-5", nombre: "Elías", apellidos: "Terán", correo: "eliasteran.bustos@gmail.com", 
-  rol: "administrador", clave: "Admin123" // Contraseña corregida con mayúscula
+  rol: "administrador", clave: "Admin123" 
 };
 
 const pacientesIniciales = [
@@ -28,26 +27,35 @@ const pacientesIniciales = [
     rut: "11111111-1", nombre: "Admin", apellidos: "Principal", correo: "admin@nutrivida.cl", 
     rol: "administrador", clave: "Admin123"
   },
-  adminElias // Te agregamos a la lista inicial
+  {
+    rut: "22222222-2", nombre: "Administrador", apellidos: "Secundario", correo: "admin@gmail.com", 
+    rol: "administrador", clave: "Admin123" // <-- Se agregó la cuenta que solicitaste
+  },
+  adminElias
 ];
 
 function leerUsuarios() {
   try {
     let guardados = JSON.parse(localStorage.getItem(CLAVE_USUARIOS));
     
-    // Si no hay datos guardados, carga la lista completa
     if (!guardados || guardados.length === 0) {
       localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(pacientesIniciales));
       return pacientesIniciales;
     }
 
-    // LÓGICA ANTI-CACHÉ MEJORADA: Te inyecta si no estás, o actualiza tu clave si la cambiaste
     const indexElias = guardados.findIndex(u => u.correo.toLowerCase() === adminElias.correo.toLowerCase());
     if (indexElias === -1) {
       guardados.push(adminElias);
       localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(guardados));
     } else if (guardados[indexElias].clave !== adminElias.clave) {
       guardados[indexElias].clave = adminElias.clave;
+      localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(guardados));
+    }
+
+    // Asegurar que admin@gmail.com también persista si limpian caché a medias
+    const indexAdminGmail = guardados.findIndex(u => u.correo.toLowerCase() === "admin@gmail.com");
+    if (indexAdminGmail === -1) {
+      guardados.push(pacientesIniciales[3]);
       localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(guardados));
     }
 
@@ -78,7 +86,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(usuarios));
   }
 
-  // LÓGICA ESTRICTA DE INICIO DE SESIÓN
   function iniciarSesion(correo, clave, rolSolicitado) {
     const usuarios = leerUsuarios();
     const encontrado = usuarios.find((u) => u.correo.toLowerCase() === correo.toLowerCase());
@@ -97,7 +104,8 @@ export function AuthProvider({ children }) {
 
     setUsuario(encontrado);
     localStorage.setItem(CLAVE_SESION, JSON.stringify(encontrado));
-    return { exito: true };
+    // IMPORTANTE: Ahora retorna el rol para que LoginRegistro sepa dónde redirigir
+    return { exito: true, rol: encontrado.rol };
   }
 
   function cerrarSesion() {
